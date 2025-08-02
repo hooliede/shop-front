@@ -6,7 +6,17 @@ import { initialCart } from "../cart/cartSlice";
 
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password }, { rejectWithValue }) => {}
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      // 성공했을 때
+      // login페이지에서 처리?...
+      return response.data;
+    } catch (error) {
+      // 실패했을 때 -> reduce에 에러 저장
+      return rejectWithValue(error.error);
+    }
+  }
 );
 
 export const loginWithGoogle = createAsyncThunk(
@@ -69,17 +79,34 @@ const userSlice = createSlice({
       state.registrationError = null;
     },
   },
-  extraReducers: (builder) => { // extrareducers은 외부에서 발생한 액션, 특히 비동기 액션을 처리하는 전용 영역, 서버 통신 후 Redux Store에 결과를 저장하는 역할
-    builder.addCase(registerUser.pending, (state) => { // 서버와의 통신을 기다릴 때
-              state.loading = true;
-           })
-           .addCase(registerUser.fulfilled, (state) => { // 서버와의 통신이 성공일 때
-              state.loading = false;
-              state.registrationError = null;
-           })
-           .addCase(registerUser.rejected, (state, action) => { // 서버와의 통신이 실패일 때
-              state.registrationError = action.payload
-           })
+  extraReducers: (builder) => {
+    // extrareducers은 외부에서 발생한 액션, 특히 비동기 액션을 처리하는 전용 영역, 서버 통신 후 Redux Store에 결과를 저장하는 역할
+    builder
+      .addCase(registerUser.pending, (state) => {
+        // 서버와의 통신을 기다릴 때
+        state.loading = true;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        // 서버와의 통신이 성공일 때
+        state.loading = false;
+        state.registrationError = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        // 서버와의 통신이 실패일 때
+        state.registrationError = action.payload;
+      })
+      .addCase(loginWithEmail.pending, (state) => {
+        state.loading = true;        
+      })
+      .addCase(loginWithEmail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.loginError = null;
+      })
+      .addCase(loginWithEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.loginError = action.payload;
+      });
   },
 });
 export const { clearErrors } = userSlice.actions;
