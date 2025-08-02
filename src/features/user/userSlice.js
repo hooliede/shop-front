@@ -24,7 +24,10 @@ export const loginWithGoogle = createAsyncThunk(
   async (token, { rejectWithValue }) => {}
 );
 
-export const logout = () => (dispatch) => {};
+export const logout = () => (dispatch) => {
+  sessionStorage.removeItem('token');
+  dispatch(clearUser());
+};
 export const registerUser = createAsyncThunk(
   // 비동기 처리
   "user/registerUser", // Redux 내부에서 액션을 식별할 때 쓰는 고유 문자열 ID로  Redux에서 "이건 userSlice의 registerUser 액션이다"라는 걸 나타내는 식별자
@@ -61,10 +64,19 @@ export const registerUser = createAsyncThunk(
 
 export const loginWithToken = createAsyncThunk(
   "user/loginWithToken",
-  async (_, { rejectWithValue }) => {}
+  async (_, { rejectWithValue }) => {
+    try{
+      const response = await api.get("/user/me")
+      return response.data
+    }catch(error){
+      return rejectWithValue(error.error);
+
+    }
+  }
 );
 
 const userSlice = createSlice({
+  
   name: "user",
   initialState: {
     user: null,
@@ -78,6 +90,10 @@ const userSlice = createSlice({
       state.loginError = null;
       state.registrationError = null;
     },
+    clearUser: (state) => {
+      state.token = null;
+      state.user = null;
+    }
   },
   extraReducers: (builder) => {
     // extrareducers은 외부에서 발생한 액션, 특히 비동기 액션을 처리하는 전용 영역, 서버 통신 후 Redux Store에 결과를 저장하는 역할
@@ -102,13 +118,23 @@ const userSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.loginError = null;
+        // token의 저장을 음... loginWithEmail에서 하는 거랑
+        // extraReducers에서 하는 거랑 차이가 있나 흠..
         sessionStorage.setItem("token", action.payload.token);
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
-      });
+      })
+      // pending은 필요 없으니 지우기
+      .addCase(loginWithToken.fulfilled, (state,action) => {
+        state.user = action.payload.user
+      })
+      // reject도 딱히 할 게 없네
+     
+
+     
   },
 });
-export const { clearErrors } = userSlice.actions;
+export const { clearUser, clearErrors } = userSlice.actions;
 export default userSlice.reducer;
