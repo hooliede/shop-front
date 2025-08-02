@@ -102,6 +102,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.loginError = null;
+        sessionStorage.setItem("token", action.payload.token);
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
