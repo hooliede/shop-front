@@ -9,10 +9,10 @@ export const getProductList = createAsyncThunk(
     try{
       const response = await api.get("/product")
       if(response.status!==200) throw new Error(response.error)
-
+      
       return response.data.data
     } catch(error) {
-      rejectWithValue(error.error);
+      return rejectWithValue(error.error);
     }
   }
 );
@@ -32,6 +32,7 @@ export const createProduct = createAsyncThunk(
       dispatch(
         showToastMessage({ message: "상품 등록 완료", status: "success" })
       );
+      await dispatch(getProductList());
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -97,6 +98,7 @@ const productSlice = createSlice({
     .addCase(getProductList.rejected,(state,action)=> {
       state.loading=false;
       state.error=action.payload;
+
     })
   },
 });
