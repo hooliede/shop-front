@@ -10,8 +10,6 @@ import {
   editProduct,
 } from "../../../features/product/productSlice";
 
-
-
 const InitialFormData = {
   name: "",
   sku: "",
@@ -62,7 +60,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
     //모든걸 초기화시키고;
     // 다이얼로그 닫아주기
   };
-console.log("stock",stock);
+  console.log("stock", stock);
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log("formdata", formData);
@@ -70,16 +68,18 @@ console.log("stock",stock);
     // stock은 formData에서 Object인데 우리가 state를 사용해서 Array로 사용
     // [["M", "3"], ["S", "17"]] => {M:3, S:17} 이렇게 객체로 바꿔야 함
     //재고를 입력했는지 확인, 아니면 에러
-    if(stock.length === 0) return setStockError(true);
+    if (stock.length === 0) return setStockError(true);
 
     // 재고를 배열에서 객체로 바꿔주기
-    const totalStock = stock.reduce((total,item) => { // reduce란 array를 원하는 형식으로 하는 거
-      return {...total,[item[0]]:parseInt(item[1])}
-    },{}) 
+    const totalStock = stock.reduce((total, item) => {
+      // reduce란 array를 원하는 형식으로 하는 거
+      return { ...total, [item[0]]: parseInt(item[1]) };
+    }, {});
     console.log("formdata111111111", totalStock);
     // [['M',2]] 에서 {M:2}로
     if (mode === "new") {
       //새 상품 만들기
+      dispatch(createProduct({ ...formData, stock: totalStock }));
     } else {
       // 상품 수정하기
     }
@@ -137,7 +137,7 @@ console.log("stock",stock);
 
   const uploadImage = (url) => {
     //이미지 업로드
-    setFormData({...formData, image: url});
+    setFormData({ ...formData, image: url });
   };
 
   return (

@@ -6,7 +6,7 @@ import axios from "axios";
 // const BACKEND_PROXY = process.env.REACT_APP_BACKEND_PROXY;
 // console.log("proxy", BACKEND_PROXY);
 const api = axios.create({
-   // baseURL: LOCAL_BACKEND,
+  //  baseURL: LOCAL_BACKEND,
    baseURL: HEROKU_BACKEND,
   headers: {
     "Content-Type": "application/json",
